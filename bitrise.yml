@@ -1,0 +1,40 @@
+format_version: '1.0.0'
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+workflows:
+  primary:
+    steps:
+      - activate-ssh-key@4:
+          run_if: '{{getenv "BITRISE_IS_SCHEDULED" | ne "true"}}'
+      - git-clone@6: {}
+      - script@1:
+          title: Install Dependencies
+          inputs:
+            - content: |
+                #!/bin/bash
+                set -ex
+                # Ensure Python and pip are installed
+                sudo apt-get update
+                sudo apt-get install -y python3 python3-pip
+                # Install required packages
+                pip3 install python-telegram-bot rajaji
+      - script@1:
+          title: Run Telegram Bot Script
+          inputs:
+            - content: |
+                #!/bin/bash
+                set -ex
+                # Run the Python script
+                python3 raja.py
+
+  deploy:
+    steps:
+      - activate-ssh-key@4:
+          run_if: '{{getenv "BITRISE_IS_SCHEDULED" | ne "true"}}'
+      - git-clone@6: {}
+      - script@1:
+          title: Deploy Application
+          inputs:
+            - content: |
+                #!/bin/bash
+                echo "Deploying application..."
